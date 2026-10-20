@@ -1,5 +1,5 @@
-const CACHE = 'outfit-v1';
-const FILES = ['./', 'index.html', 'style.css', 'app.js', 'colors.js', 'recommend.js', 'weather.js', 'garment-svg.js', 'db.js', 'manifest.webmanifest', 'icons/icon.svg'];
+const CACHE = 'outfit-v2';
+const FILES = ['./', 'index.html', 'style.css', 'app.js', 'colors.js', 'recommend.js', 'weather.js', 'garment-svg.js', 'character-svg.js', 'db.js', 'manifest.webmanifest', 'icons/icon.svg'];
 
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', (e) => {

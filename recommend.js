@@ -1,4 +1,4 @@
-import { colorScore } from './colors.js';
+import { colorScore, colorById } from './colors.js';
 
 export const TYPES = [
   { id: 'top', name: '상의' },
@@ -70,4 +70,62 @@ export function outfitForToday(items, bandId, rnd = Math.random, rain = false) {
     if (s > bestScore) { bestScore = s; best = o; }
   }
   return { ...best, band, rain };
+}
+
+// ---------- 색 조합 탭: 고른 색으로 남편 코디 만들기 ----------
+const POOLS = {
+  inner: ['white', 'cream', 'oatmeal', 'lightgray', 'gray', 'charcoal', 'black', 'beige', 'navy', 'sky', 'pink', 'denim', 'burgundy', 'olive', 'sage', 'mint', 'lavender', 'mustard'],
+  outer: ['white', 'cream', 'oatmeal', 'lightgray', 'gray', 'charcoal', 'black', 'beige', 'stone', 'camel', 'brown', 'darkbrown', 'navy', 'denim', 'khaki', 'olive', 'forest', 'burgundy', 'plum', 'rust', 'sage'],
+  bottom: ['black', 'charcoal', 'navy', 'denim', 'darkbrown', 'brown', 'khaki', 'beige', 'cream', 'white', 'gray', 'stone', 'camel', 'olive', 'forest', 'oatmeal', 'lightgray'],
+  shoes: ['darkbrown', 'brown', 'black', 'white', 'camel', 'charcoal', 'gray', 'navy', 'oatmeal', 'cream'],
+};
+const EARTH = new Set(['brown', 'darkbrown', 'camel', 'khaki', 'beige', 'stone', 'oatmeal', 'cream']);
+const DARK = new Set(['black', 'charcoal', 'navy', 'gray']);
+const CLASSIC = new Set(['black', 'charcoal', 'navy', 'denim', 'darkbrown', 'brown', 'khaki']);
+const lum = (id) => {
+  const h = colorById(id).hex;
+  return (0.299 * parseInt(h.slice(1, 3), 16) + 0.587 * parseInt(h.slice(3, 5), 16) + 0.114 * parseInt(h.slice(5, 7), 16)) / 255;
+};
+const NEUTRAL = new Set(['white', 'cream', 'lightgray', 'gray', 'charcoal', 'black', 'oatmeal', 'beige', 'stone']);
+
+/**
+ * 고른 색(pick)을 role(inner/outer/bottom)에 넣고 나머지 칸을 어울리는 색으로 채운 코디 목록.
+ * 반환: [{ outer?, inner, bottom, shoes }, ...] (색 id). rnd로 매번 다른 조합을 섞는다.
+ */
+export function outfitsForColor(pick, role, withOuter = true, count = 4, rnd = Math.random) {
+  const slots = withOuter || role === 'outer' ? ['outer', 'inner', 'bottom', 'shoes'] : ['inner', 'bottom', 'shoes'];
+  const free = slots.filter((s) => s !== role);
+  const cands = free.map((s) => {
+    const good = POOLS[s].filter((c) => c !== pick && colorScore(pick, c) >= 2);
+    return good.length ? good : POOLS[s].filter((c) => c !== pick && colorScore(pick, c) >= 1);
+  });
+
+  const all = [];
+  const walk = (i, cur) => {
+    if (i === free.length) { all.push({ ...cur, [role]: pick }); return; }
+    for (const c of cands[i]) walk(i + 1, { ...cur, [free[i]]: c });
+  };
+  walk(0, {});
+
+  const scored = all.map((o) => {
+    const ids = slots.map((s) => o[s]);
+    let s = 0;
+    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) s += colorScore(ids[i], ids[j]);
+    if (o.outer && o.outer === o.inner) s -= 2;
+    if (o.outer && o.outer === o.bottom) s -= 0.5;
+    if (o.inner === o.bottom && !NEUTRAL.has(o.inner)) s -= 1.5;
+    if (CLASSIC.has(o.bottom)) s += 0.5;
+    if (o.outer) s += 1.2 * Math.abs(lum(o.outer) - lum(o.inner)); // 겉옷과 상의는 밝기 차이가 있어야 예쁘다
+    if (EARTH.has(o.bottom) && EARTH.has(o.shoes)) s += 0.6; // 브라운 하의 + 브라운 신발처럼 톤을 맞추면 가산점
+    if (DARK.has(o.bottom) && DARK.has(o.shoes)) s += 0.4;
+    return { o, s: s + rnd() * 0.8 };
+  }).sort((a, b) => b.s - a.s);
+
+  const maxShared = Math.max(1, free.length - 2);
+  const out = [];
+  for (const { o } of scored) {
+    if (out.every((p) => free.filter((s) => p[s] === o[s]).length <= maxShared)) out.push(o);
+    if (out.length >= count) break;
+  }
+  return out;
 }

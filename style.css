@@ -45,3 +45,17 @@ label { display: block; font-weight: 600; margin: 12px 0 6px; }
 input[type=file] { width: 100%; }
 .preview { width: 100%; max-height: 260px; object-fit: contain; border-radius: 12px; margin-top: 8px; }
 .sec { font-weight: 700; margin: 14px 0 6px; }
+
+/* 색 조합: 무드보드 */
+.board { background-color: #cbb99c; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(0,0,0,.04) 0 1px, transparent 1px 4px); border-radius: 14px; padding: 18px 12px 14px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+.board-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
+.outfit-card { min-width: 0; }
+.frame { position: relative; background: #fbfaf7; padding: 8px; border-radius: 3px; box-shadow: 0 4px 10px rgba(0,0,0,.28); }
+.frame .man { display: block; width: 100%; height: auto; }
+.pin { position: absolute; top: -9px; left: 50%; margin-left: -8px; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f1d98f, #b88a2a 60%, #7a5a14); box-shadow: 0 2px 3px rgba(0,0,0,.35); }
+.swatches { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; margin-top: 14px; }
+.sw { text-align: center; min-width: 0; }
+.sw span { position: relative; display: block; aspect-ratio: 1; border-radius: 3px; box-shadow: 0 2px 5px rgba(0,0,0,.3); border: 3px solid #fbfaf7; }
+.sw .pin { top: -7px; width: 11px; height: 11px; margin-left: -5px; }
+.sw small { display: block; margin-top: 4px; font-size: 10px; line-height: 1.25; color: #3b3126; }
+.chip:disabled { opacity: .5; }

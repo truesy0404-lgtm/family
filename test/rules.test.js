@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { colorScore, matchingColors, nearestColor } from '../colors.js';
-import { bandForTemp, pairsFor, outfitForToday } from '../recommend.js';
+import { bandForTemp, pairsFor, outfitForToday, outfitsForColor } from '../recommend.js';
 
 assert.equal(colorScore('white', 'navy'), 2);
 assert.equal(colorScore('navy', 'white'), 2);          // 대칭
@@ -29,4 +29,18 @@ assert.equal(cold.outer.id, 'o1');                     // 추우면 겉옷 포�
 const hot = outfitForToday(items, 'hot');
 assert.equal(hot.outer, null);                         // 더우면 겉옷 없음
 assert.equal(hot.top.id, 't3');                        // 얇은 상의만
+
+// 색 확장 + 코디 생성
+assert.ok(matchingColors('burgundy').includes('darkbrown'));
+assert.equal(colorScore('cream', 'burgundy'), 2);
+assert.equal(nearestColor(63, 42, 31), 'darkbrown');
+const fits = outfitsForColor('burgundy', 'outer', true, 4);
+assert.equal(fits.length, 4);
+for (const f of fits) {
+  assert.equal(f.outer, 'burgundy');
+  assert.ok(f.inner && f.bottom && f.shoes);
+  assert.ok(colorScore(f.outer, f.inner) >= 1 && colorScore(f.outer, f.bottom) >= 1);
+}
+const noOuter = outfitsForColor('white', 'bottom', false, 4)[0];
+assert.ok(!noOuter.outer && noOuter.bottom === 'white');
 console.log('OK');
