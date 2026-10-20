@@ -2,10 +2,10 @@ import { colorById } from './colors.js';
 
 // 사진 속 네 구역(겉옷·상의·하의·신발)의 원래 평균 밝기. 주름/그림자 질감을 살리는 기준값.
 const SETS = {
-  jacket: { photo: 'assets/man.jpg', mask: 'assets/man-mask.png', avg: { outer: 0.2498, inner: 0.8662, bottom: 0.3166, shoes: 0.2816 } },
-  plain: { photo: 'assets/man2.jpg', mask: 'assets/man2-mask.png', avg: { outer: 1, inner: 0.9223, bottom: 0.3174, shoes: 0.2773 } }, // 겉옷 벗은 사진
+  jacket: { photo: 'assets/man.jpg', mask: 'assets/man-mask.png', avg: { outer: 0.2432, inner: 0.8758, bottom: 0.3142, shoes: 0.2758 } },
+  plain: { photo: 'assets/man2.jpg', mask: 'assets/man2-mask.png', avg: { outer: 1, inner: 0.9250, bottom: 0.3178, shoes: 0.2676 } }, // 겉옷 벗은 사진
 };
-const REGIONS = ['outer', 'inner', 'bottom', 'shoes'];
+const REGIONS = ['bottom', 'shoes', 'inner', 'outer']; // 나중에 칠하는 쪽이 위: 겉옷·상의가 바지 경계를 덮는다
 
 const loading = {};
 
@@ -64,7 +64,8 @@ export async function paintMan(canvas, o) {
   const out = ctx.createImageData(w, h);
   out.data.set(orig);
   const target = {};
-  for (const k of REGIONS) if (o[k]) target[k] = rgb(o[k]);
+  const tlum = {};
+  for (const k of REGIONS) if (o[k]) { target[k] = rgb(o[k]); tlum[k] = (0.299 * target[k][0] + 0.587 * target[k][1] + 0.114 * target[k][2]) / 255; }
   for (const i of hit) {
     const p = i * 4;
     const r = orig[p], g = orig[p + 1], b = orig[p + 2];
@@ -73,7 +74,9 @@ export async function paintMan(canvas, o) {
     for (const k of REGIONS) {
       const wgt = weights[k][i];
       if (wgt < 0.004 || !target[k]) continue;
-      const ratio = 1 + (lum / AVG[k] - 1) * 0.6, t = target[k]; // 주름·그림자는 살리되 밝은 색에서 얼룩지지 않게 완화
+      const t = target[k];
+      // 주름·그림자 질감은 살리되, 하이라이트가 새 색보다 밝게 튀어 흰 선이 되지 않도록 상한을 둔다. 밝은 색일수록 질감을 약하게.
+      const ratio = Math.min(1 + (lum / AVG[k] - 1) * (0.25 + 0.4 * (1 - tlum[k])), 1.1);
       R = R * (1 - wgt) + Math.min(255, t[0] * ratio) * wgt;
       G = G * (1 - wgt) + Math.min(255, t[1] * ratio) * wgt;
       B = B * (1 - wgt) + Math.min(255, t[2] * ratio) * wgt;
