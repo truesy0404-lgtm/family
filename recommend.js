@@ -77,10 +77,7 @@ const POOLS = {
   inner: ['white', 'cream', 'oatmeal', 'lightgray', 'gray', 'charcoal', 'black', 'beige', 'navy', 'sky', 'pink', 'denim', 'burgundy', 'olive', 'sage', 'mint', 'lavender', 'mustard'],
   outer: ['white', 'cream', 'oatmeal', 'lightgray', 'gray', 'charcoal', 'black', 'beige', 'stone', 'camel', 'brown', 'darkbrown', 'navy', 'denim', 'khaki', 'olive', 'forest', 'burgundy', 'plum', 'rust', 'sage'],
   bottom: ['black', 'charcoal', 'navy', 'denim', 'darkbrown', 'brown', 'khaki', 'beige', 'cream', 'white', 'gray', 'stone', 'camel', 'olive', 'forest', 'oatmeal', 'lightgray'],
-  shoes: ['darkbrown'], // 사진 속 신발(다크브라운)은 바꾸지 않는다
 };
-const EARTH = new Set(['brown', 'darkbrown', 'camel', 'khaki', 'beige', 'stone', 'oatmeal', 'cream']);
-const DARK = new Set(['black', 'charcoal', 'navy', 'gray']);
 const CLASSIC = new Set(['black', 'charcoal', 'navy', 'denim', 'darkbrown', 'brown', 'khaki']);
 const lum = (id) => {
   const h = colorById(id).hex;
@@ -90,10 +87,10 @@ const NEUTRAL = new Set(['white', 'cream', 'lightgray', 'gray', 'charcoal', 'bla
 
 /**
  * 고른 색(pick)을 role(inner/outer/bottom)에 넣고 나머지 칸을 어울리는 색으로 채운 코디 목록.
- * 반환: [{ outer?, inner, bottom, shoes }, ...] (색 id). rnd로 매번 다른 조합을 섞는다.
+ * 반환: [{ outer?, inner, bottom }, ...] (색 id). rnd로 매번 다른 조합을 섞는다.
  */
 export function outfitsForColor(pick, role, withOuter = true, count = 4, rnd = Math.random) {
-  const slots = withOuter || role === 'outer' ? ['outer', 'inner', 'bottom', 'shoes'] : ['inner', 'bottom', 'shoes'];
+  const slots = withOuter || role === 'outer' ? ['outer', 'inner', 'bottom'] : ['inner', 'bottom']; // 신발은 사진 그대로라 조합에 넣지 않는다
   const free = slots.filter((s) => s !== role);
   const cands = free.map((s) => {
     const good = POOLS[s].filter((c) => c !== pick && colorScore(pick, c) >= 2);
@@ -116,8 +113,6 @@ export function outfitsForColor(pick, role, withOuter = true, count = 4, rnd = M
     if (o.inner === o.bottom && !NEUTRAL.has(o.inner)) s -= 1.5;
     if (CLASSIC.has(o.bottom)) s += 0.5;
     if (o.outer) s += 1.2 * Math.abs(lum(o.outer) - lum(o.inner)); // 겉옷과 상의는 밝기 차이가 있어야 예쁘다
-    if (EARTH.has(o.bottom) && EARTH.has(o.shoes)) s += 0.6; // 브라운 하의 + 브라운 신발처럼 톤을 맞추면 가산점
-    if (DARK.has(o.bottom) && DARK.has(o.shoes)) s += 0.4;
     return { o, s: s + rnd() * 0.8 };
   }).sort((a, b) => b.s - a.s);
 

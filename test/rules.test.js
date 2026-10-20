@@ -35,13 +35,13 @@ assert.ok(matchingColors('burgundy').includes('darkbrown'));
 assert.equal(colorScore('cream', 'burgundy'), 2);
 assert.equal(nearestColor(63, 42, 31), 'darkbrown');
 const fits = outfitsForColor('burgundy', 'outer', true, 4);
-assert.ok(fits.every((f) => f.shoes === 'darkbrown'));      // 신발은 사진 그대로(다크브라운)
+assert.ok(fits.every((f) => !('shoes' in f)));              // 신발은 조합에 넣지 않음
 assert.equal(fits.length, 4);
 for (const f of fits) {
   assert.equal(f.outer, 'burgundy');
-  assert.ok(f.inner && f.bottom && f.shoes);
+  assert.ok(f.inner && f.bottom);
   assert.ok(colorScore(f.outer, f.inner) >= 1 && colorScore(f.outer, f.bottom) >= 1);
 }
 const noOuter = outfitsForColor('white', 'bottom', false, 4)[0];
-assert.ok(!noOuter.outer && noOuter.bottom === 'white');
+assert.ok(!noOuter.outer && noOuter.bottom === 'white' && !('shoes' in noOuter));
 console.log('OK');
