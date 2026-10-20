@@ -51,7 +51,7 @@ input[type=file] { width: 100%; }
 .board-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
 .outfit-card { min-width: 0; }
 .frame { position: relative; background: #fbfaf7; padding: 8px; border-radius: 3px; box-shadow: 0 4px 10px rgba(0,0,0,.28); }
-.frame .man, .frame .man-photo { display: block; width: 100%; height: auto; }
+.frame .man { display: block; width: 100%; height: auto; }
 .pin { position: absolute; top: -9px; left: 50%; margin-left: -8px; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f1d98f, #b88a2a 60%, #7a5a14); box-shadow: 0 2px 3px rgba(0,0,0,.35); }
 .swatches { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; margin-top: 14px; }
 .sw { text-align: center; min-width: 0; }
