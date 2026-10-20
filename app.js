@@ -11,7 +11,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 
 const state = {
   tab: 'today', items: [], weather: null, weatherErr: false, band: null,
-  closetFilter: 'all', pairBase: null, colorPick: 'burgundy', colorRole: 'outer', colorOuter: true, colorSeed: 0, outfit: null,
+  closetFilter: 'all', pairBase: null, colorPick: 'burgundy', colorRole: 'outer', colorSeed: 0, outfit: null,
 };
 
 async function refreshItems() { state.items = await listItems(); }
@@ -143,14 +143,16 @@ function outfitCard(o) {
 }
 
 function renderColors() {
-  const { colorPick: pick, colorRole: role, colorOuter: withOuter } = state;
-  const outfits = outfitsForColor(pick, role, withOuter, 4, mulberry32(state.colorSeed * 9973 + pick.length * 31 + role.length));
+  const { colorPick: pick, colorRole: role } = state;
+  // 겉옷 입은 사진 2개 + 벗은 사진 2개를 섞어 보여 준다. 겉옷 색을 골랐으면 모두 겉옷 입은 사진.
+  const rnd = mulberry32(state.colorSeed * 9973 + pick.length * 31 + role.length);
+  const outfits = role === 'outer'
+    ? outfitsForColor(pick, role, true, 4, rnd)
+    : [...outfitsForColor(pick, role, true, 2, rnd), ...outfitsForColor(pick, role, false, 2, rnd)];
   view.innerHTML = `<h1>색 조합</h1><p class="sub">입고 싶은 색을 눌러 보세요</p>
     ${swatches(pick, 'data-pick')}
     <div class="row" style="margin:14px 0 6px"><span>이 색을</span>
       ${ROLES.map((r) => `<button class="chip ${role === r.id ? 'on' : ''}" data-role="${r.id}">${r.name}</button>`).join('')}</div>
-    <div class="row" style="margin:6px 0 4px"><button class="chip ${withOuter || role === 'outer' ? 'on' : ''}" id="outerToggle" ${role === 'outer' ? 'disabled' : ''}>겉옷 입기</button>
-      <span class="sub">${withOuter || role === 'outer' ? '겉옷을 입은 모습' : '겉옷을 벗은 모습'}</span></div>
     <h2>${colorById(pick).name}와 어울리는 코디</h2>
     <div class="board"><div class="board-grid">${outfits.map(outfitCard).join('') || '<div class="empty">추천이 없어요</div>'}</div></div>
     <button class="btn block" id="shuffle" style="margin-top:12px">다른 조합 보기</button>`;
@@ -195,7 +197,6 @@ view.addEventListener('click', async (e) => {
   else if (d.pair) { state.pairBase = d.pair; render(); }
   else if (d.pick) { state.colorPick = d.pick; render(); }
   else if (d.role) { state.colorRole = d.role; render(); }
-  else if (t.id === 'outerToggle') { state.colorOuter = !state.colorOuter; render(); }
   else if (t.id === 'shuffle') { state.colorSeed++; render(); }
 });
 
