@@ -77,7 +77,7 @@ const POOLS = {
   inner: ['white', 'cream', 'oatmeal', 'lightgray', 'gray', 'charcoal', 'black', 'beige', 'navy', 'sky', 'pink', 'denim', 'burgundy', 'olive', 'sage', 'mint', 'lavender', 'mustard'],
   outer: ['white', 'cream', 'oatmeal', 'lightgray', 'gray', 'charcoal', 'black', 'beige', 'stone', 'camel', 'brown', 'darkbrown', 'navy', 'denim', 'khaki', 'olive', 'forest', 'burgundy', 'plum', 'rust', 'sage'],
   bottom: ['black', 'charcoal', 'navy', 'denim', 'darkbrown', 'brown', 'khaki', 'beige', 'cream', 'white', 'gray', 'stone', 'camel', 'olive', 'forest', 'oatmeal', 'lightgray'],
-  shoes: ['darkbrown', 'brown', 'black', 'white', 'camel', 'charcoal', 'gray', 'navy', 'oatmeal', 'cream'],
+  shoes: ['darkbrown'], // 사진 속 신발(다크브라운)은 바꾸지 않는다
 };
 const EARTH = new Set(['brown', 'darkbrown', 'camel', 'khaki', 'beige', 'stone', 'oatmeal', 'cream']);
 const DARK = new Set(['black', 'charcoal', 'navy', 'gray']);

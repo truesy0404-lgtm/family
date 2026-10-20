@@ -11,7 +11,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 
 const state = {
   tab: 'today', items: [], weather: null, weatherErr: false, band: null,
-  closetFilter: 'all', pairBase: null, colorPick: 'burgundy', colorRole: 'outer', colorSeed: 0, outfit: null,
+  closetFilter: 'all', pairBase: null, colorPick: 'burgundy', colorRole: 'inner', colorSeed: 0, outfit: null,
 };
 
 async function refreshItems() { state.items = await listItems(); }
@@ -133,7 +133,7 @@ function renderPair() {
 function mulberry32(a) {
   return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
-const ROLES = [{ id: 'outer', name: '겉옷' }, { id: 'inner', name: '상의' }, { id: 'bottom', name: '하의' }];
+const ROLES = [{ id: 'inner', name: '상의' }, { id: 'bottom', name: '하의' }];
 const SLOT_LABEL = { inner: '상의', outer: '겉옷', bottom: '하의', shoes: '신발' };
 
 function outfitCard(o) {
@@ -144,11 +144,8 @@ function outfitCard(o) {
 
 function renderColors() {
   const { colorPick: pick, colorRole: role } = state;
-  // 겉옷 입은 사진 2개 + 벗은 사진 2개를 섞어 보여 준다. 겉옷 색을 골랐으면 모두 겉옷 입은 사진.
   const rnd = mulberry32(state.colorSeed * 9973 + pick.length * 31 + role.length);
-  const outfits = role === 'outer'
-    ? outfitsForColor(pick, role, true, 4, rnd)
-    : [...outfitsForColor(pick, role, true, 2, rnd), ...outfitsForColor(pick, role, false, 2, rnd)];
+  const outfits = outfitsForColor(pick, role, false, 4, rnd);
   view.innerHTML = `<h1>색 조합</h1><p class="sub">입고 싶은 색을 눌러 보세요</p>
     ${swatches(pick, 'data-pick')}
     <div class="row" style="margin:14px 0 6px"><span>이 색을</span>

@@ -35,6 +35,7 @@ assert.ok(matchingColors('burgundy').includes('darkbrown'));
 assert.equal(colorScore('cream', 'burgundy'), 2);
 assert.equal(nearestColor(63, 42, 31), 'darkbrown');
 const fits = outfitsForColor('burgundy', 'outer', true, 4);
+assert.ok(fits.every((f) => f.shoes === 'darkbrown'));      // 신발은 사진 그대로(다크브라운)
 assert.equal(fits.length, 4);
 for (const f of fits) {
   assert.equal(f.outer, 'burgundy');

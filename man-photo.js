@@ -2,10 +2,9 @@ import { colorById } from './colors.js';
 
 // 사진 속 네 구역(겉옷·상의·하의·신발)의 원래 평균 밝기. 주름/그림자 질감을 살리는 기준값.
 const SETS = {
-  jacket: { photo: 'assets/man.jpg', mask: 'assets/man-mask.png', avg: { outer: 0.2432, inner: 0.8758, bottom: 0.3142, shoes: 0.2758 } },
-  plain: { photo: 'assets/man2.jpg', mask: 'assets/man2-mask.png', avg: { outer: 1, inner: 0.9250, bottom: 0.3178, shoes: 0.2676 } }, // 겉옷 벗은 사진
+  plain: { photo: 'assets/man2.jpg', mask: 'assets/man2-mask.png', avg: { outer: 1, inner: 0.9250, bottom: 0.3178, shoes: 0.2676 } },
 };
-const REGIONS = ['bottom', 'shoes', 'inner', 'outer']; // 나중에 칠하는 쪽이 위: 겉옷·상의가 바지 경계를 덮는다
+const REGIONS = ['bottom', 'inner']; // 상의가 바지 경계를 덮는다. 신발은 사진 그대로 둔다.
 
 const loading = {};
 
@@ -54,9 +53,9 @@ const rgb = (id) => {
   return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 };
 
-/** 사진 속 남편이 입은 옷 색만 o({outer?,inner,bottom,shoes})의 색으로 바꿔 canvas에 그린다. outer가 없으면 겉옷 벗은 사진. */
+/** 사진 속 남편의 상의·하의 색만 o({inner,bottom})의 색으로 바꿔 canvas에 그린다. 신발과 얼굴은 사진 그대로. */
 export async function paintMan(canvas, o) {
-  const set = o.outer ? 'jacket' : 'plain';
+  const set = 'plain';
   const AVG = SETS[set].avg;
   const { w, h, orig, weights, hit } = await load(set);
   canvas.width = w; canvas.height = h;
