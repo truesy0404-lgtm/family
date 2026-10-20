@@ -1,6 +1,7 @@
 import { COLORS, GROUPS, colorById, nearestColor } from './colors.js';
 import { TYPES, WARMTH, BANDS, pairsFor, outfitForToday, outfitsForColor } from './recommend.js';
 import { manSVG } from './character-svg.js';
+import { paintMan } from './man-photo.js';
 import { fetchWeather } from './weather.js';
 import { listItems, saveItem, deleteItem } from './db.js';
 
@@ -10,7 +11,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 
 const state = {
   tab: 'today', items: [], weather: null, weatherErr: false, band: null,
-  closetFilter: 'all', pairBase: null, colorPick: 'burgundy', colorRole: 'outer', colorOuter: true, colorSeed: 0, outfit: null,
+  closetFilter: 'all', pairBase: null, colorPick: 'burgundy', colorRole: 'outer', colorSeed: 0, outfit: null,
 };
 
 async function refreshItems() { state.items = await listItems(); }
@@ -137,21 +138,26 @@ const SLOT_LABEL = { inner: '상의', outer: '겉옷', bottom: '하의', shoes: 
 
 function outfitCard(o) {
   const order = ['inner', 'outer', 'bottom', 'shoes'].filter((k) => o[k]);
-  return `<div class="outfit-card"><div class="frame"><i class="pin"></i>${manSVG(o, 150)}</div>
+  return `<div class="outfit-card"><div class="frame"><i class="pin"></i><canvas class="man-photo" data-o='${JSON.stringify(o)}'></canvas></div>
     <div class="swatches">${order.map((k) => `<div class="sw"><span style="background:${colorById(o[k]).hex}"><i class="pin"></i></span><small>${SLOT_LABEL[k]}<br>${colorById(o[k]).name}</small></div>`).join('')}</div></div>`;
 }
 
 function renderColors() {
-  const { colorPick: pick, colorRole: role, colorOuter: withOuter } = state;
-  const outfits = outfitsForColor(pick, role, withOuter, 4, mulberry32(state.colorSeed * 9973 + pick.length * 31 + role.length));
+  const { colorPick: pick, colorRole: role } = state;
+  const outfits = outfitsForColor(pick, role, true, 4, mulberry32(state.colorSeed * 9973 + pick.length * 31 + role.length));
   view.innerHTML = `<h1>색 조합</h1><p class="sub">입고 싶은 색을 눌러 보세요</p>
     ${swatches(pick, 'data-pick')}
     <div class="row" style="margin:14px 0 6px"><span>이 색을</span>
       ${ROLES.map((r) => `<button class="chip ${role === r.id ? 'on' : ''}" data-role="${r.id}">${r.name}</button>`).join('')}
-      <button class="chip ${withOuter || role === 'outer' ? 'on' : ''}" id="outerToggle" ${role === 'outer' ? 'disabled' : ''}>겉옷 입기</button></div>
+</div>
     <h2>${colorById(pick).name}와 어울리는 코디</h2>
     <div class="board"><div class="board-grid">${outfits.map(outfitCard).join('') || '<div class="empty">추천이 없어요</div>'}</div></div>
     <button class="btn block" id="shuffle" style="margin-top:12px">다른 조합 보기</button>`;
+  // 사진 속 옷 색 바꾸기. 실패하면 일러스트로 대신 보여 준다.
+  view.querySelectorAll('canvas.man-photo').forEach((cv) => {
+    const o = JSON.parse(cv.dataset.o);
+    paintMan(cv, o).catch(() => { cv.outerHTML = manSVG(o, 150); });
+  });
 }
 
 // ---------- 공통 ----------
@@ -188,7 +194,6 @@ view.addEventListener('click', async (e) => {
   else if (d.pair) { state.pairBase = d.pair; render(); }
   else if (d.pick) { state.colorPick = d.pick; render(); }
   else if (d.role) { state.colorRole = d.role; render(); }
-  else if (t.id === 'outerToggle') { state.colorOuter = !state.colorOuter; render(); }
   else if (t.id === 'shuffle') { state.colorSeed++; render(); }
 });
 
